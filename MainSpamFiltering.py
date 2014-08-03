@@ -156,7 +156,7 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
 
     finalProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*probabilityOfRegularMessage;
     finalProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*probabilityOfSpamMessage;
-    print(finalProbabilityThatMessageIsNotSpam," and ",finalProbabilityThatMessageIsSpam);
+    return finalProbabilityThatMessageIsSpam > finalProbabilityThatMessageIsNotSpam;
 
 frequencyOfWordsInRegularMessages={};
 frequencyOfWordsInSpamMessages={};
@@ -182,5 +182,5 @@ probabilityOfRegularMessage=(totalNumberRegularMessagesAfterFiltering/(totalNumb
 probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
 #print(probabilityOfRegularMessage," **************************  ",probabilityOfSpamMessage);
 
-print(isMessageSpam("Oh you got many responsibilities.",frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
+print(isMessageSpam("Your payment has been scheduled",frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
 
