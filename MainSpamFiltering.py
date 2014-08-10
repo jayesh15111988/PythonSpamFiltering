@@ -1,10 +1,23 @@
 from FileReader import *
 from StringUtilities import *
 from collections import Counter
+from KMeansClusteringProcessorAdvanced import GenerateKMeansClusters
 import operator
 import re
 
 
+def replaceStringWithIntegerForString(inputStringValue):
+    convertedIntegerValueToReturn=1;
+    if inputStringValue=='s':
+        convertedIntegerValueToReturn=0;
+    return convertedIntegerValueToReturn;
+
+
+def filterPointsForPossibleStringData(messageVectorCollection):
+    for individualVectorInCollection in messageVectorCollection:
+        for index,individualVectorPoint in enumerate(individualVectorInCollection):
+            if type(individualVectorPoint) is str:
+               individualVectorInCollection[index] = replaceStringWithIntegerForString(individualVectorPoint);
 
 def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllStatements):
 
@@ -58,8 +71,8 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
 
             lengthOfCurrentSelectedToken=len(individualAttributeTokens);
             
-            if(lengthOfCurrentSelectedToken<3):
-                continue;
+            #if(lengthOfCurrentSelectedToken<3):
+            #    continue;
             if(individualAttributeTokens.isupper() and lengthOfCurrentSelectedToken>lengthOfLongestAllCapitalword):
                 vectorForGivenMessage[1]=len(individualAttributeTokens);
                 lengthOfLongestAllCapitalword=lengthOfCurrentSelectedToken;
@@ -141,7 +154,7 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
     lowestProbabilityValue=(min(min(frequencyOfWordsInRegularMessages.values()),min(frequencyOfWordsInSpamMessages.values())))/10;
     
 
-    print("Lowest ",lowestProbabilityValue);
+    
     
     for individualTokenInInputMessage in tokenizedInputString:
         if not(individualTokenInInputMessage in frequencyOfWordsInRegularMessages):
@@ -156,31 +169,59 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
 
     finalProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*probabilityOfRegularMessage;
     finalProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*probabilityOfSpamMessage;
+    print("P(Message) ",finalProbabilityThatMessageIsNotSpam," And P(spam) ",finalProbabilityThatMessageIsSpam);
     return finalProbabilityThatMessageIsSpam > finalProbabilityThatMessageIsNotSpam;
 
 frequencyOfWordsInRegularMessages={};
 frequencyOfWordsInSpamMessages={};
-collectionOfVectorsOfAllStatements=[];
+collectionOfVectorsOfAllMessages=[];
 
-getAndFilterMessagesInDataStructureWithFileName('SMSSpamCollection',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllStatements);
+getAndFilterMessagesInDataStructureWithFileName('sample',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages);
 
+
+#Commenting for time being as Naive Bayes is on hold temporarily
+'''
 #Last two value of collectionOfVectorsOfAllStatements contains number of actual messages and spams respectively
 #P.S. Last value is number of spam messages out of total received message corpse
 
+##### Computation for classifying any future message as regular/spam using Bayes Theorm #####
+#For each word, we set proobability of occurrence in each spam and non-spam category
 
 setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInRegularMessages);
 setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInSpamMessages);
 
-#Second last value
+#Second last value - Total number of regular messages in given corpse
 totalNumberRegularMessagesAfterFiltering=collectionOfVectorsOfAllStatements[-2];
-#Last value
+
+#Last value - Total number of spams
 totalNumberSpamMessagesAfterFiltering=collectionOfVectorsOfAllStatements[-1];
-
-
 
 probabilityOfRegularMessage=(totalNumberRegularMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
 probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
-#print(probabilityOfRegularMessage," **************************  ",probabilityOfSpamMessage);
 
 print(isMessageSpam("Your payment has been scheduled",frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
+
+##### End Of Computation to classify test message as spam/non-spam (Using Bayes theorm) #####
+'''
+#remove last 2 elements as they specify total number of regular and spam messages in given corpse
+
+del collectionOfVectorsOfAllMessages[-2:];
+
+#print("Collection of messages is ",collectionOfVectorsOfAllMessages);
+filterPointsForPossibleStringData(collectionOfVectorsOfAllMessages);
+print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
+GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
