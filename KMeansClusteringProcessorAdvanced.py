@@ -41,17 +41,16 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
     # If desired index >(=)len(vector)-1(len(vector)) then don't access elemnt simply return -1 as default value
     #print("updated max length is",len(centroidHolderForInputMessages[0]),len(centroidHolderForInputMessages[1]));
     #print("Generated Centroid Sequence is ",centroidHolderForInputMessages," and record sequence number is ",duplicateChecker);
-    print("Original centroid is ",centroidHolderForInputMessages);
+    #print("Original centroid is ",centroidHolderForInputMessages);
     #Make sure we run this loop until entire sum of difference between previous and current centroid is less
     #than some predefined threshold  - In other words, all of them have been stabilized for sure to specific set of centroid
     predefinedThreshold=5.0;
     differenceBetweenCentroids=1000;
 
-    regularMessagesVectorContainer=[];
-    spamMessagesVectorContainer=[];
+    
 
     
-    allMessagesContainer=[regularMessagesVectorContainer,spamMessagesVectorContainer];
+    
 
     #TODO - Use NumPy which uses low level C API for Mathematical computations
 
@@ -60,8 +59,13 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
     
     #while(differenceBetweenCentroids>predefinedThreshold):
     iterator1=8;
-    while(iterator1>0):
-        print("Iterator value is ",iterator1);
+    #while(iterator1>0):
+    while(differenceBetweenCentroids>1.0):
+        regularMessagesVectorContainer=[];
+        spamMessagesVectorContainer=[];
+        allMessagesContainer=[regularMessagesVectorContainer,spamMessagesVectorContainer];    
+        #print ("Data BEFORE soritng out centroid is -->  ",'[%s]' % ','.join(map(str, allMessagesContainer)));
+        print("Centroid for our purpose is CCCCCCCCCCCCCCCCCCCCCCC ",centroidHolderForInputMessages);
         for individualVector in collectionOfVectorsOfAllMessages:
             minDistanceFromCentroid=1000;
             centroidNumberToChoose=-1;
@@ -102,8 +106,8 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
                     totalValue=totalValue+valToAdd;
                 vectorWithAverageValueInit.append(totalValue/lengthOfVectorInVector);
             newCentroidHolderForPoints.append(vectorWithAverageValueInit);
-        #print("old centroid holder with points is ",centroidHolderForInputMessages,len(centroidHolderForInputMessages),len(centroidHolderForInputMessages[0]),len(centroidHolderForInputMessages[1]));
-        #print("New centroid holder with points is ",newCentroidHolderForPoints,len(newCentroidHolderForPoints),len(newCentroidHolderForPoints[0]),len(newCentroidHolderForPoints[1]));
+        print("old centroid holder with points is ",centroidHolderForInputMessages,len(centroidHolderForInputMessages),len(centroidHolderForInputMessages[0]),len(centroidHolderForInputMessages[1]));
+        print("New centroid holder with points is ",newCentroidHolderForPoints,len(newCentroidHolderForPoints),len(newCentroidHolderForPoints[0]),len(newCentroidHolderForPoints[1]));
         #Now calculate difference between old and new centroids
 
         #Now Append -1 to empty centroid value
@@ -114,16 +118,18 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
             oldIndividualCentroid=centroidHolderForInputMessages[indexOuttermost];
             newIndividualCentroid=newCentroidHolderForPoints[indexOuttermost];
             for indexInIndividualVector in range(0,lengthOfVector):
+                #print("Sum of differecnes is",sumOfDifferencesForCentroids);
                 sumOfDifferencesForCentroids=sumOfDifferencesForCentroids+math.fabs(oldIndividualCentroid[indexInIndividualVector]-newIndividualCentroid[indexInIndividualVector]);        
             #sumOfDifferencesForCentroids=sumOfDifferencesForCentroids+fabs(centroidHolderForInputMessages[indexOuttermost]-newCentroidHolderForPoints[indexOuttermost]);
         differenceBetweenCentroids=sumOfDifferencesForCentroids;
-        print("Diffrecenr is ",differenceBetweenCentroids);
+        print("Difference at the bottom is ",differenceBetweenCentroids);
+        
         centroidHolderForInputMessages=newCentroidHolderForPoints;
-        iterator1=iterator1-1;
+        #iterator1=iterator1-1;
 
 
     
-#GenerateKMeansClusters([[1,2,3,4,3,6,8,9,0],[6,5,4,3,2,1],[4,5,6,3,2,1],[6,5,4,1,2,3],[100,200,300,456,432,291]],2);
+#GenerateKMeansClusters([[1,2,3,4,3,6,8,9,0],[6,5,4,3,2,1],[4,5,6,3,2,1],[6,5,4,1,2,3],[100,200,300,456,432,291],[300,400,200,100,500,300]],2);
 '''
         newCentroidHolderForPoints=[];
         for index,individualCalculatedVector in enumerate(allMessagesContainer):
