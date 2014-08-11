@@ -19,14 +19,15 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
     maximumVectorSequenceValue=len(collectionOfVectorsOfAllMessages)-1
         #print("Maximum length of collection vector is Modified ** ",maximumVectorSequenceValue);
     
-    if(os.path.isfile("centroidHolder.txt")):
-        centroidHolderForInputMessages=getDataStructureFromFileWithName("centroidHolder.txt");
+    if(os.path.isfile("../centroidHolder.txt")):
+        centroidHolderForInputMessages=getDataStructureFromFileWithName("../centroidHolder.txt");
         messageCategorizationData=getDataStructureFromFileWithName("messageCategorization.txt");
     #print("Centroid holder from previous input messages ",centroidHolderForInputMessages; 
     #while(iterator1>0):
     #Check if file with precalculated data exists
     #if(True):
-    if(len(centroidHolderForInputMessages)==0 or isTrainingFileOldEnough("centroidHolder.txt")):
+    if(len(centroidHolderForInputMessages)==0 or isTrainingFileOldEnough("../centroidHolder.txt")):
+        print("Inside");
         while(numberOfClustersGeneratedSoFar<numberOfDesiredOutputClusters):
             #generate random point first range is
         
@@ -153,7 +154,7 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
             writeDataStructureToFileWithName([{1:"spam",0:"regularMessage"}],["messageCategorization.txt"]);
         messageCategorizationData=getDataStructureFromFileWithName("messageCategorization.txt");
 
-        writeDataStructureToFileWithName([allMessagesContainer,centroidHolderForInputMessages],["categorizedPointsHolder.txt","centroidHolder.txt"]);
+        writeDataStructureToFileWithName([allMessagesContainer,centroidHolderForInputMessages],["../categorizedPointsHolder.txt","../centroidHolder.txt"]);
 
 
 
