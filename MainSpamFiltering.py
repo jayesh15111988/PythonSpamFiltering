@@ -19,14 +19,14 @@ def filterPointsForPossibleStringData(messageVectorCollection):
             if type(individualVectorPoint) is str:
                individualVectorInCollection[index] = replaceStringWithIntegerForString(individualVectorPoint);
 
-def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllStatements):
+def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllStatements,dynamicAttributrMappingDictionary):
 
     separatedMessageData= convertAndGetFilesDataInListFromFileWithName(inputFileName);
 
     numberOfActualMessages=len(separatedMessageData[0]);
     numberOfSpamMessages=len(separatedMessageData[1]);
     #print(numberOfActualMessages," Initial ",numberOfSpamMessages);
-    dynamicAttributrMappingDictionary={};
+    
     dynamicAttributrMappingDictionary['numberOfCapitalLettersInMessage']=1;
     dynamicAttributrMappingDictionary['lengthOfLongestAllCapitalword']=2;
     dynamicAttributrMappingDictionary['messageTypeIndicator']=3;
@@ -87,7 +87,7 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
                 vectorForGivenMessage[indexForGivenVector]=0;
             else:
                 vectorForGivenMessage[indexForGivenVector]=vectorForGivenMessage[indexForGivenVector]+1;
-
+            #this is because we have return realMessage,spamMessage;
             if(externalIndex<len(separatedMessageData[0])):
                 #We have actual message
                 vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]='m';
@@ -106,17 +106,13 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
         #Commenting for time being to eliminate garbage on cosole output screen
         #print(externalIndex," th vector is ",vectorForGivenMessage," for message "+individualPuncutationRemovedMessage);
     #Last two value for 'collectionOfVectorsOfAllStatements' we append number of valid messages and spams respectively
-    #print(numberOfActualMessages," Final ",numberOfSpamMessages)
     collectionOfVectorsOfAllStatements.append(numberOfActualMessages);
     collectionOfVectorsOfAllStatements.append(numberOfSpamMessages);
     #We got out of even the most extrenal loop possible 
-    #print(len(frequencyOfWordsInRegularMessages)," fucking python ");
     #topNMostOccurringWordsInMessages=dict(Counter(frequencyOfWordsInRegularMessages).most_common(5));
     #topNMostOccurringWordsInSpams=dict(Counter(frequencyOfWordsInSpamMessages).most_common(5));
-    #return frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages;
     #print("maessage most occurring n words ",frequencyOfWordsInRegularMessages);
     #print("spam most occurring n words ",frequencyOfWordsInSpamMessages);
-    #return frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages;
     
 
 #Warning - To use in future to counteract against differences in vector lengths
@@ -137,7 +133,6 @@ def setProbabilityForOccurrenceOfEachWordInStore(inputStoreWithCountOfEachWord):
     for individualKey in collectionOfAllWordsInStore:
         totalFrequencyOfAllWordsInStore=totalFrequencyOfAllWordsInStore+inputStoreWithCountOfEachWord[individualKey];
 
-    
     for word in collectionOfAllWordsInStore:
         inputStoreWithCountOfEachWord[word]=inputStoreWithCountOfEachWord[word]/totalFrequencyOfAllWordsInStore;
        
@@ -150,7 +145,7 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
     #print(frequencyOfWordsInRegularMessages,"  ",frequencyOfWordsInSpamMessages);
     #Now using Actual Bayes Theorm;
 
-    #This is shady - They say use zero or any marginal value using minimum value among them all
+    #This is shady - They say use zero or any marginal value using minimum value among them all and suppress it by 1/10th of its original value
     lowestProbabilityValue=(min(min(frequencyOfWordsInRegularMessages.values()),min(frequencyOfWordsInSpamMessages.values())))/10;
     
 
@@ -175,9 +170,10 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
 frequencyOfWordsInRegularMessages={};
 frequencyOfWordsInSpamMessages={};
 collectionOfVectorsOfAllMessages=[];
+dynamicAttributrMappingDictionary={};
+getAndFilterMessagesInDataStructureWithFileName('SMSSpamCollection',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 
-getAndFilterMessagesInDataStructureWithFileName('sample',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages);
-
+#SMSSpamCollection
 
 #Commenting for time being as Naive Bayes is on hold temporarily
 '''
@@ -207,10 +203,19 @@ print(isMessageSpam("Your payment has been scheduled",frequencyOfWordsInRegularM
 
 del collectionOfVectorsOfAllMessages[-2:];
 
-#print("Collection of messages is ",collectionOfVectorsOfAllMessages);
+print("Collection of messages is ",len(max(collectionOfVectorsOfAllMessages, key=len)));
 filterPointsForPossibleStringData(collectionOfVectorsOfAllMessages);
 print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
-GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2);
+collectionOfVectorsOfProductionMessages=[];
+getAndFilterMessagesInDataStructureWithFileName('productionMessageData',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfProductionMessages,dynamicAttributrMappingDictionary);
+#Remove last two elements which carry no meaning with them
+del collectionOfVectorsOfProductionMessages[-2:];
+filterPointsForPossibleStringData(collectionOfVectorsOfProductionMessages);
+#This is collection of vectors converted from user data - Pass it to K-means to easily verify thereafter
+#Length is 6 and not just 4 as per number of lines, as we also append number of (approximate) regular and spam messages
+#print("Collection of messages is  And actual messages are ",collectionOfVectorsOfProductionMessages);
+#print("Generated map for all possible words --->>  ",dynamicAttributrMappingDictionary," with length is ",len(dynamicAttributrMappingDictionary));
+GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages);
 
 
 
