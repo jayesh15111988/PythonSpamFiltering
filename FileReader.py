@@ -1,4 +1,6 @@
 import random;
+import pickle;
+import Constants;
 
 def getFileData(fileName):
     spamFilteringDataFile=open(fileName,'r');
@@ -16,9 +18,9 @@ def convertAndGetFilesDataInListFromFileWithName(fileName):
     for individualLine in data:
         tokenizedLine=individualLine.split('\t');
         if(len(tokenizedLine)>1):
-            if(tokenizedLine[0] == "spam"):
+            if(tokenizedLine[0] == Constants.DEFAULT_SPAM_INDICATOR_STRING):
                 spamMessage.append(tokenizedLine[1]);
-            elif (tokenizedLine[0] == "ham"):
+            elif (tokenizedLine[0] == Constants.DEFAULT_MESSAGE_INDICATOR_STRING):
                 realMessage.append(tokenizedLine[1]);
             else:
                 assert (true),"Value of classification label other than spam or ham"
@@ -32,6 +34,17 @@ def convertAndGetFilesDataInListFromFileWithName(fileName):
             
     #print("lengths are",len(realMessage),len(spamMessage))
     return realMessage,spamMessage;
+
+def writeDataStructureToFileWithName(dataStructure,fileName):
+    maxLengthInputSequence=len(dataStructure);
+    for sequence in range(0,maxLengthInputSequence):
+        pickle.dump( dataStructure[sequence], open( fileName[sequence], "wb" ) );
+
+def getDataStructureFromFileWithName(fileName):
+    try:
+        return pickle.load( open( fileName, "rb" ) );
+    except EOFError:
+        return [];
 
 
 

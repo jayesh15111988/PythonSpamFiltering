@@ -1,14 +1,16 @@
-from FileReader import *
-from StringUtilities import *
-from collections import Counter
-from KMeansClusteringProcessorAdvanced import GenerateKMeansClusters
-import operator
-import re
+import re;
+from FileReader import *;
+from StringUtilities import *;
+from collections import Counter;
+import Constants;
+from KMeansClusteringProcessorAdvanced import GenerateKMeansClusters;
+from NaiveBayesProcessor import *;
+import operator;
 
 
 def replaceStringWithIntegerForString(inputStringValue):
     convertedIntegerValueToReturn=1;
-    if inputStringValue=='s':
+    if inputStringValue==Constants.DEFAULT_SPAM_CHARACTER:
         convertedIntegerValueToReturn=0;
     return convertedIntegerValueToReturn;
 
@@ -33,21 +35,13 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
     dynamicAttributrMappingDictionary['lengthOfLongestWordInString']=4;
 
     fullMessageDetailsWithRegularAndSpamMessage=separatedMessageData[0]+separatedMessageData[1];
-
-    
-
-    #print(len(fullMessageDetailsWithRegularAndSpamMessage));
     filteredMessagesWithPunctuationElimination=[];
-
     
     #Dictionaries which store frequency of each word occurring in each actual message and spam respectively
     #This will later be used for Naive Bayes inference
-    #frequencyOfWordsInRegularMessages={};
-    #frequencyOfWordsInSpamMessages={};
     
     for i,individualMessage in enumerate(fullMessageDetailsWithRegularAndSpamMessage):
         filteredMessagesWithPunctuationElimination.append(getStringWithPunctuationsRemoved(individualMessage));
-
 
     for externalIndex,individualPuncutationRemovedMessage in enumerate(filteredMessagesWithPunctuationElimination):
         tokenizedDataIntoArray=list(filter(None, re.split('\W+',individualPuncutationRemovedMessage)));
@@ -63,12 +57,10 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
         vectorForGivenMessage=[-1]*len(dynamicAttributrMappingDictionary);
         
         #initialize these variable for each message that will be encountered
-        #print(externalIndex);
+        
         lengthOfLongestAllCapitalword=-1;
 
         for index,individualAttributeTokens in enumerate(tokenizedDataIntoArray):
-
-
             lengthOfCurrentSelectedToken=len(individualAttributeTokens);
             
             #if(lengthOfCurrentSelectedToken<3):
@@ -77,7 +69,6 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
                 vectorForGivenMessage[1]=len(individualAttributeTokens);
                 lengthOfLongestAllCapitalword=lengthOfCurrentSelectedToken;
 
-            
             if not(individualAttributeTokens in dynamicAttributrMappingDictionary):
                 dynamicAttributrMappingDictionary[individualAttributeTokens]=len(dynamicAttributrMappingDictionary)+1
                 vectorForGivenMessage=vectorForGivenMessage+[-1];
@@ -87,37 +78,34 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
                 vectorForGivenMessage[indexForGivenVector]=0;
             else:
                 vectorForGivenMessage[indexForGivenVector]=vectorForGivenMessage[indexForGivenVector]+1;
-            #this is because we have return realMessage,spamMessage;
+
+            #This is because we have return realMessage,spamMessage;
             if(externalIndex<len(separatedMessageData[0])):
+
                 #We have actual message
-                vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]='m';
+
+                vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]=Constants.DEFAULT_MESSAGE_CHARACTER;
                 storeInProbabilityStoreForValue(frequencyOfWordsInRegularMessages,individualAttributeTokens)
             else:
+
                 #We have spam as we already crossed message boundary
-                vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]='s';
+
+                vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]=Constants.DEFAULT_SPAM_CHARACTER;
                 storeInProbabilityStoreForValue(frequencyOfWordsInSpamMessages,individualAttributeTokens)
-         #Here end tokenizer loop and we go get next message - Might it be a spam or not   
-        vectorForGivenMessage[dynamicAttributrMappingDictionary['numberOfCapitalLettersInMessage']-1]=getNumberOfCapitalLettersFromWord(individualPuncutationRemovedMessage);
-        #print(tokenizedDataIntoArray," sequence tokens ");
-        #if tokenizedDataIntoArray:
+        #Here end tokenizer loop and we go get next message - Might it be a spam or not   
+        vectorForGivenMessage[dynamicAttributrMappingDictionary['numberOfCapitalLettersInMessage']-1]=getNumberOfCapitalLettersFromWord(individualPuncutationRemovedMessage);        
         vectorForGivenMessage[dynamicAttributrMappingDictionary['lengthOfLongestWordInString']-1]=len(max(tokenizedDataIntoArray, key=len));
         collectionOfVectorsOfAllStatements.append(vectorForGivenMessage);
-        #print(len(dynamicAttributrMappingDictionary));
+        
         #Commenting for time being to eliminate garbage on cosole output screen
-        #print(externalIndex," th vector is ",vectorForGivenMessage," for message "+individualPuncutationRemovedMessage);
+        
     #Last two value for 'collectionOfVectorsOfAllStatements' we append number of valid messages and spams respectively
     collectionOfVectorsOfAllStatements.append(numberOfActualMessages);
     collectionOfVectorsOfAllStatements.append(numberOfSpamMessages);
+
     #We got out of even the most extrenal loop possible 
     #topNMostOccurringWordsInMessages=dict(Counter(frequencyOfWordsInRegularMessages).most_common(5));
     #topNMostOccurringWordsInSpams=dict(Counter(frequencyOfWordsInSpamMessages).most_common(5));
-    #print("maessage most occurring n words ",frequencyOfWordsInRegularMessages);
-    #print("spam most occurring n words ",frequencyOfWordsInSpamMessages);
-    
-
-#Warning - To use in future to counteract against differences in vector lengths
-#element=(currentIndex > length(vectorUnderConsideration)-1)?-1:vectorUnderConsideration[currentIndex]
-#will be used in kMean clustering
 
 def storeInProbabilityStoreForValue(probabilityHolder,wordToUpdateProbabilityFor):
     if (wordToUpdateProbabilityFor in probabilityHolder):
@@ -125,97 +113,63 @@ def storeInProbabilityStoreForValue(probabilityHolder,wordToUpdateProbabilityFor
     else:
         probabilityHolder[wordToUpdateProbabilityFor]=1;
                 
-
-def setProbabilityForOccurrenceOfEachWordInStore(inputStoreWithCountOfEachWord):
-    totalFrequencyOfAllWordsInStore=0;
-    collectionOfAllWordsInStore=inputStoreWithCountOfEachWord.keys();
-
-    for individualKey in collectionOfAllWordsInStore:
-        totalFrequencyOfAllWordsInStore=totalFrequencyOfAllWordsInStore+inputStoreWithCountOfEachWord[individualKey];
-
-    for word in collectionOfAllWordsInStore:
-        inputStoreWithCountOfEachWord[word]=inputStoreWithCountOfEachWord[word]/totalFrequencyOfAllWordsInStore;
-       
-def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage):
-    tokenizedInputString = re.split('\W+',getStringWithPunctuationsRemoved(receivedMessage));
-
-    #Initialize probability values first
-    temporaryProbabilityThatMessageIsSpam=1.0;
-    temporaryProbabilityThatMessageIsNotSpam=1.0;
-    #print(frequencyOfWordsInRegularMessages,"  ",frequencyOfWordsInSpamMessages);
-    #Now using Actual Bayes Theorm;
-
-    #This is shady - They say use zero or any marginal value using minimum value among them all and suppress it by 1/10th of its original value
-    lowestProbabilityValue=(min(min(frequencyOfWordsInRegularMessages.values()),min(frequencyOfWordsInSpamMessages.values())))/10;
-    
-
-    
-    
-    for individualTokenInInputMessage in tokenizedInputString:
-        if not(individualTokenInInputMessage in frequencyOfWordsInRegularMessages):
-            temporaryProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*lowestProbabilityValue;
-        else:
-            temporaryProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*frequencyOfWordsInRegularMessages[individualTokenInInputMessage];
-            
-        if not(individualTokenInInputMessage in frequencyOfWordsInSpamMessages):
-            temporaryProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*lowestProbabilityValue;
-        else:
-            temporaryProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*frequencyOfWordsInSpamMessages[individualTokenInInputMessage];     
-
-    finalProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*probabilityOfRegularMessage;
-    finalProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*probabilityOfSpamMessage;
-    print("P(Message) ",finalProbabilityThatMessageIsNotSpam," And P(spam) ",finalProbabilityThatMessageIsSpam);
-    return finalProbabilityThatMessageIsSpam > finalProbabilityThatMessageIsNotSpam;
-
 frequencyOfWordsInRegularMessages={};
 frequencyOfWordsInSpamMessages={};
 collectionOfVectorsOfAllMessages=[];
 dynamicAttributrMappingDictionary={};
-getAndFilterMessagesInDataStructureWithFileName('SMSSpamCollection',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 
-#SMSSpamCollection
+print("filr name is ",Constants.TRAINING_DATA_FILE);
+getAndFilterMessagesInDataStructureWithFileName(Constants.SMALL_TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 
-#Commenting for time being as Naive Bayes is on hold temporarily
-'''
-#Last two value of collectionOfVectorsOfAllStatements contains number of actual messages and spams respectively
-#P.S. Last value is number of spam messages out of total received message corpse
 
-##### Computation for classifying any future message as regular/spam using Bayes Theorm #####
-#For each word, we set proobability of occurrence in each spam and non-spam category
+def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
 
-setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInRegularMessages);
-setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInSpamMessages);
+    #Commenting for time being as Naive Bayes is on hold temporarily
 
-#Second last value - Total number of regular messages in given corpse
-totalNumberRegularMessagesAfterFiltering=collectionOfVectorsOfAllStatements[-2];
+    #Last two value of collectionOfVectorsOfAllStatements contains number of actual messages and spams respectively
+    #P.S. Last value is number of spam messages out of total received message corpse
 
-#Last value - Total number of spams
-totalNumberSpamMessagesAfterFiltering=collectionOfVectorsOfAllStatements[-1];
+    ##### Computation for classifying any future message as regular/spam using Bayes Theorm #####
+    #For each word, we set proobability of occurrence in each spam and non-spam category
 
-probabilityOfRegularMessage=(totalNumberRegularMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
-probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
+    setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInRegularMessages);
+    setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInSpamMessages);
 
-print(isMessageSpam("Your payment has been scheduled",frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
+    #Second last value - Total number of regular messages in given corpse
+    totalNumberRegularMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-2];
 
-##### End Of Computation to classify test message as spam/non-spam (Using Bayes theorm) #####
-'''
-#remove last 2 elements as they specify total number of regular and spam messages in given corpse
+    #Last value - Total number of spams
+    totalNumberSpamMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-1];
 
-del collectionOfVectorsOfAllMessages[-2:];
+    probabilityOfRegularMessage=(totalNumberRegularMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
+    probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
 
-print("Collection of messages is ",len(max(collectionOfVectorsOfAllMessages, key=len)));
-filterPointsForPossibleStringData(collectionOfVectorsOfAllMessages);
-print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
-collectionOfVectorsOfProductionMessages=[];
-getAndFilterMessagesInDataStructureWithFileName('productionMessageData',frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfProductionMessages,dynamicAttributrMappingDictionary);
-#Remove last two elements which carry no meaning with them
-del collectionOfVectorsOfProductionMessages[-2:];
-filterPointsForPossibleStringData(collectionOfVectorsOfProductionMessages);
-#This is collection of vectors converted from user data - Pass it to K-means to easily verify thereafter
-#Length is 6 and not just 4 as per number of lines, as we also append number of (approximate) regular and spam messages
-#print("Collection of messages is  And actual messages are ",collectionOfVectorsOfProductionMessages);
-#print("Generated map for all possible words --->>  ",dynamicAttributrMappingDictionary," with length is ",len(dynamicAttributrMappingDictionary));
-GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages);
+    inputMessageListForNaiveBayesEvaluation=getFileData(sampleSpamFilename);
+    for individualProductionMessage in inputMessageListForNaiveBayesEvaluation:
+        print("Message ->>  ",individualProductionMessage," Is of category -->> ",isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
+
+def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
+    
+    del collectionOfVectorsOfAllMessages[-2:];
+    filterPointsForPossibleStringData(collectionOfVectorsOfAllMessages);
+    collectionOfVectorsOfProductionMessages=[];
+    getAndFilterMessagesInDataStructureWithFileName(sampleSpamFilename,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfProductionMessages,dynamicAttributrMappingDictionary);
+
+    #Remove last two elements which carry no meaning with them
+
+    del collectionOfVectorsOfProductionMessages[-2:];
+    filterPointsForPossibleStringData(collectionOfVectorsOfProductionMessages);
+    
+    #This is collection of vectors converted from user data - Pass it to K-means to easily verify thereafter
+    #Length is 6 and not just 4 as per number of lines, as we also append number of (approximate) regular and spam messages
+    
+    GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages);
+    print("Collection of messages is ",len(max(collectionOfVectorsOfAllMessages, key=len)));
+    print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
+print("collection is ",collectionOfVectorsOfAllMessages);
+
+runNaiveBayesOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
+#runKMeansClusteringOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
 
 
 
