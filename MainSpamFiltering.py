@@ -1,5 +1,7 @@
 import re;
 from FileReader import *;
+from datetime import datetime;
+from dateTimeUtility import isTrainingFileOldEnough;
 from StringUtilities import *;
 from collections import Counter;
 import Constants;
@@ -118,7 +120,7 @@ frequencyOfWordsInSpamMessages={};
 collectionOfVectorsOfAllMessages=[];
 dynamicAttributrMappingDictionary={};
 
-print("filr name is ",Constants.TRAINING_DATA_FILE);
+print("filr name is ",Constants.SMALL_TRAINING_DATA_FILE);
 getAndFilterMessagesInDataStructureWithFileName(Constants.SMALL_TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 
 
@@ -131,11 +133,31 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
 
     ##### Computation for classifying any future message as regular/spam using Bayes Theorm #####
     #For each word, we set proobability of occurrence in each spam and non-spam category
-
-    setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInRegularMessages);
-    setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInSpamMessages);
-
+    global frequencyOfWordsInRegularMessages;
+    global frequencyOfWordsInSpamMessages;
+    
+    print(frequencyOfWordsInRegularMessages, " Frequency in regular message ");
+    if(isTrainingFileOldEnough(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY) or isTrainingFileOldEnough(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY)):
+        print("Storing first time");
+        setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInRegularMessages);
+        setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInSpamMessages);
+        writeDataStructureToFileWithName([frequencyOfWordsInRegularMessages],[Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY]);
+        writeDataStructureToFileWithName([frequencyOfWordsInSpamMessages],[Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY]);
+    else:
+        print("utilizing stored data");
+        frequencyOfWordsInRegularMessages=getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY);
+        frequencyOfWordsInSpamMessages=getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY);
     #Second last value - Total number of regular messages in given corpse
+    print("Frequency in regular Message ",frequencyOfWordsInRegularMessages,"Frequency in spam message ",frequencyOfWordsInSpamMessages);
+
+    
+        
+    
+        
+
+
+
+    
     totalNumberRegularMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-2];
 
     #Last value - Total number of spams
@@ -146,7 +168,7 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
 
     inputMessageListForNaiveBayesEvaluation=getFileData(sampleSpamFilename);
     for individualProductionMessage in inputMessageListForNaiveBayesEvaluation:
-        print("Message ->>  ",individualProductionMessage," Is of category -->> ",isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
+        print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator -->> ",isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
 
 def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
     
@@ -166,9 +188,13 @@ def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVec
     GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages);
     print("Collection of messages is ",len(max(collectionOfVectorsOfAllMessages, key=len)));
     print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
-print("collection is ",collectionOfVectorsOfAllMessages);
+#print("collection is ",collectionOfVectorsOfAllMessages);
 
+startTime = datetime.now();
 runNaiveBayesOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
+#print("Message freq",getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"\n\n");
+#print("Spams Freq",getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"\n\n");
+print(datetime.now()-startTime);
 #runKMeansClusteringOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
 
 

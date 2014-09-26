@@ -1,8 +1,7 @@
 import random;
 import math;
-from FileReader import *
-#Cause we are gonna write generated cluster points and final centroid to file instead of recalculating it again and again
-import Constants;
+from FileReader import *;
+from Constants import *;
 import os.path;
 from dateTimeUtility import isTrainingFileOldEnough;
 
@@ -24,7 +23,6 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
     
     #Check if file with precalculated data exists
     if(len(centroidHolderForInputMessages)==0 or isTrainingFileOldEnough(Constants.OUTPUT_CENTROID_FILE_NAME)):
-        
         while(numberOfClustersGeneratedSoFar<numberOfDesiredOutputClusters):
             #generate random point first range is
         

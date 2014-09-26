@@ -38,5 +38,5 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
 
     finalProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*probabilityOfRegularMessage;
     finalProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*probabilityOfSpamMessage;
-    print("P(Message) ",finalProbabilityThatMessageIsNotSpam," And P(spam) ",finalProbabilityThatMessageIsSpam);
+    print("P(Message)--> ",finalProbabilityThatMessageIsNotSpam," And P(spam) --> ",finalProbabilityThatMessageIsSpam,"\n\n");
     return finalProbabilityThatMessageIsSpam > finalProbabilityThatMessageIsNotSpam;
