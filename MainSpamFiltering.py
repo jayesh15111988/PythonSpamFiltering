@@ -227,7 +227,14 @@ def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVec
 
 startTime = datetime.now();
 getAndFilterMessagesInDataStructureWithFileName(Constants.TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
+
 runNaiveBayesOnDataFromFileWithName(Constants.SMALL_TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+
+#Following methods to write words from spam and regular messages to suitable file for graphical representation
+
+#writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"../regularMessagesFrequency.csv");
+#writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"../spamMessagesFrequency.csv");
+
 #print("Message freq",(getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY)),"\n\n");
 #print("Spams Freq",(getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY)),"\n\n");
 runKMeansClusteringOnDataFromFileWithName(Constants.SMALL_TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);

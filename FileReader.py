@@ -1,6 +1,7 @@
 import random;
 import pickle;
 import Constants;
+import csv;
 
 def getFileData(fileName):
     spamFilteringDataFile=open(fileName,'r');
@@ -45,6 +46,13 @@ def getDataStructureFromFileWithName(fileName):
         return pickle.load( open( fileName, "rb" ) );
     except EOFError:
         return [];
+
+def writeDictionaryInCSVFile(dictionaryToWrite,fileName):
+    with open(fileName, 'w', newline='') as fp:
+        CSVFileWriter = csv.writer(fp, delimiter=',')
+        for word, frequency in dictionaryToWrite.items():
+            CSVFileWriter.writerow([word, frequency]);
+
 
 
 
