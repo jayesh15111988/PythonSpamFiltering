@@ -4,8 +4,9 @@ from FileReader import *;
 from Constants import *;
 import os.path;
 from dateTimeUtility import isTrainingFileOldEnough;
+from AlgorithmVerificationRoutine import getMessagesAndClassLablesWithInputFile;
 
-def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutputClusters,collectionOfVectorsOfProductionMessages):
+def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutputClusters,collectionOfVectorsOfProductionMessages,inputProductionMessagesFileName):
 
     #Beginning of computation for K-means clustering for given set of message - Gotta be challenging
     numberOfClusters=2 #Since there are only two classes for us
@@ -144,10 +145,33 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         writeDataStructureToFileWithName([allMessagesContainer,centroidHolderForInputMessages],[Constants.OUTPUT_VECTOR_FILE_NAME,Constants.OUTPUT_CENTROID_FILE_NAME]);
 
 
+    #In the previous step, we generated centroid based off of a training data and
+    #Now it's time to classify messages from our production data
 
     finalClassificationHolder=[[],[]];
-    #Now it's time to classify messages from our production data
-    for individualTestVector in collectionOfVectorsOfProductionMessages:
+
+
+
+
+    inputMessageListForKMeansEvaluation=getFileData(inputProductionMessagesFileName);
+
+    isTestFileInput=False;
+
+
+    listOfSpamAndRegularMessagesTokens=[];
+    listOfIndividualMessages=[];
+
+    tokenizedLine=inputMessageListForKMeansEvaluation[0].split('\t');
+
+    if(len(tokenizedLine)>1):
+        isTestFileInput=True;
+        getMessagesAndClassLablesWithInputFile(inputMessageListForKMeansEvaluation,listOfSpamAndRegularMessagesTokens,
+                                               listOfIndividualMessages);
+
+    #print("Individual message ",listOfSpamAndRegularMessagesTokens," And list of indivdual messages is ",listOfIndividualMessages);
+    numberOfCorrectClassifications=0;
+    totalNumberOfInputMessages=len(collectionOfVectorsOfProductionMessages);
+    for vectorCollectionIndex,individualTestVector in enumerate(collectionOfVectorsOfProductionMessages):
         minDistanceFromCentroids=DEFAULT_MINIMUM_DISTANCE_FROM_CENTROID;
         centroidToAssign=DEFAULT_CENTROID_TO_ASSIGN_TO_DATA_POINT;
         for centroidHolderIndex,individualFinalCentroidValues in enumerate(centroidHolderForInputMessages):
@@ -161,9 +185,23 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
                 minDistanceFromCentroids=tempminDistanceFromCentroids;
                 centroidToAssign=centroidHolderIndex;
         finalClassificationHolder[centroidToAssign].append(individualTestVector);
-        print(messageCategorizationData[centroidToAssign]," this is final catgory for test data ");
+        print("Spam indicator --> ",isMessageSpam(messageCategorizationData[centroidToAssign]));
+        if(isTestFileInput):
+            if(isMessageSpam(messageCategorizationData[centroidToAssign])==listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
+                numberOfCorrectClassifications=numberOfCorrectClassifications+1;
+            else:
+                print("Wrong Classification ",listOfIndividualMessages[vectorCollectionIndex]);
+    if(isTestFileInput):
+        print("Total messages parsed ",totalNumberOfInputMessages,"Number of correct classifications",numberOfCorrectClassifications,
+          " Accuracy of K Means classification ",numberOfCorrectClassifications/totalNumberOfInputMessages);
 
-    #print(finalClassificationHolder);            
+
+def isMessageSpam(messageLabelName):
+    messageSpamIndictor=False;
+    if(messageLabelName==Constants.DEFAULT_SPAM_INDICATOR_STRING):
+        messageSpamIndictor=True;
+    return messageSpamIndictor;
+    #print(finalClassificationHolder);
     #print(getDataStructureFromFileWithName("categorizedPointsHolder.txt"));
     #print(getDataStructureFromFileWithName("centroidHolder.txt"));
 

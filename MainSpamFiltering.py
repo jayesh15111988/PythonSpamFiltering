@@ -6,6 +6,7 @@ from StringUtilities import *;
 from collections import Counter;
 import Constants;
 from KMeansClusteringProcessorAdvanced import GenerateKMeansClusters;
+from AlgorithmVerificationRoutine import getMessagesAndClassLablesWithInputFile;
 from NaiveBayesProcessor import *;
 import operator;
 
@@ -179,11 +180,8 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
 
     if(len(tokenizedLine)>1):
         isTestFileInput=True;
-        for individualProductionMessageToParse in inputMessageListForNaiveBayesEvaluation:
-            tokenizedLine=individualProductionMessageToParse.split('\t');
-            #First Element has to be label and second Element is Actual Message
-            listOfSpamAndRegularMessagesTokens.append(True if tokenizedLine[0]==Constants.DEFAULT_SPAM_INDICATOR_STRING else False);
-            listOfInputProductionMessages.append(tokenizedLine[1]);
+        getMessagesAndClassLablesWithInputFile(inputMessageListForNaiveBayesEvaluation,listOfSpamAndRegularMessagesTokens,
+                                               listOfInputProductionMessages);
     else:
         listOfInputProductionMessages=inputMessageListForNaiveBayesEvaluation;
 
@@ -219,18 +217,18 @@ def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVec
     
     #This is collection of vectors converted from user data - Pass it to K-means to easily verify thereafter
     #Length is 6 and not just 4 as per number of lines, as we also append number of (approximate) regular and spam messages
-    
-    GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages);
+
+    GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages,sampleSpamFilename);
     print("Collection of messages is ",len(max(collectionOfVectorsOfAllMessages, key=len)));
     print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
 #print("collection is ",collectionOfVectorsOfAllMessages);
 
 startTime = datetime.now();
 getAndFilterMessagesInDataStructureWithFileName(Constants.TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
-runNaiveBayesOnDataFromFileWithName(Constants.SMALL_TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+#runNaiveBayesOnDataFromFileWithName(Constants.SMALL_TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
 #print("Message freq",getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"\n\n");
 #print("Spams Freq",getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"\n\n");
-#runKMeansClusteringOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
+runKMeansClusteringOnDataFromFileWithName(Constants.TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
 print(datetime.now()-startTime);
 
 
