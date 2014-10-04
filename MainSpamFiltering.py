@@ -169,14 +169,31 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
 
     inputMessageListForNaiveBayesEvaluation=getFileData(sampleSpamFilename);
     print("Input messages list ",inputMessageListForNaiveBayesEvaluation);
-    tokenizedLine=inputMessageListForNaiveBayesEvaluation[0].split('\t');
-    if(len(tokenizedLine)>1):
-        print("Test file");
-    else:
-        print("not a test file");
+    isTestFileInput=False;
 
-    for inputMessagesIndex,individualProductionMessage in enumerate(inputMessageListForNaiveBayesEvaluation):
-        print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator -->> ",isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
+
+    listOfSpamAndRegularMessagesTokens=[];
+    listOfInputProductionMessages=[];
+
+    tokenizedLine=inputMessageListForNaiveBayesEvaluation[0].split('\t');
+
+    if(len(tokenizedLine)>1):
+        isTestFileInput=True;
+        for individualProductionMessageToParse in inputMessageListForNaiveBayesEvaluation:
+            tokenizedLine=individualProductionMessageToParse.split('\t');
+            #First Element has to be label and second Element is Actual Message
+            listOfSpamAndRegularMessagesTokens.append(True if tokenizedLine[0]==Constants.DEFAULT_SPAM_INDICATOR_STRING else False);
+            listOfInputProductionMessages.append(tokenizedLine[1]);
+    else:
+        listOfInputProductionMessages=inputMessageListForNaiveBayesEvaluation;
+
+    #print("List of input messages stirng is ",listOfInputProductionMessages,"And tokens are",listOfSpamAndRegularMessagesTokens);
+    for inputMessagesIndex,individualProductionMessage in enumerate(listOfInputProductionMessages):
+        outputResultOfProductionMessage=isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage);
+        print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator -->> ",outputResultOfProductionMessage);
+        if(isTestFileInput):
+            print("Is Algorithm Reliable on the input String ",
+              outputResultOfProductionMessage==listOfSpamAndRegularMessagesTokens[inputMessagesIndex]);
 
 def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
 
