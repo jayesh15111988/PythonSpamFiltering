@@ -2,7 +2,7 @@ import os;
 import datetime;
 import time;
 def getMaximumDaysDifferenceBeforeFileGetsOld():
-    return 7;
+    return 60;
 
 def isTrainingFileOldEnough(filename):
     if(not(os.path.isfile(filename))):

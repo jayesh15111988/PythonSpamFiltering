@@ -37,7 +37,7 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         #Both centroids thus generated, append -1 to them until for both of them length is equal to
         #maximum length of vector in given collection
         lengthOfMaximumLengthVectorInCollection=len(max(collectionOfVectorsOfAllMessages, key=len));  #len(collectionOfVectorsOfAllMessages[maximumVectorSequenceValue]);
-        print("max length is ",lengthOfMaximumLengthVectorInCollection);
+        ###print("max length is ",lengthOfMaximumLengthVectorInCollection);
         newCentroidHolderForInputMessages=[];
     
         #print("max length is  ",lengthOfMaximumLengthVectorInCollection);
