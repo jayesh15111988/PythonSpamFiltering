@@ -10,13 +10,11 @@ def isTrainingFileOldEnough(filename):
     if(not(os.path.isfile(filename))):
         return True;
 
-    t = os.path.getmtime(filename)
-    differenceInSecondsBetweenTwoFiles=(time.time()-t);
+    lastTimeFileModified = os.path.getmtime(filename)
+    differenceInSecondsBetweenTwoFiles=(time.time()-lastTimeFileModified);
+    #Converting Seconds to days. 1 Day - 24*60*60 seconds
     diffrenceInDays=differenceInSecondsBetweenTwoFiles/(24*60*60);
+    print("Last time File containing training data modified was ",diffrenceInDays," Days ago");
     return diffrenceInDays>getMaximumDaysDifferenceBeforeFileGetsOld();
-    #print(t);
-    #return datetime.datetime.fromtimestamp(t)
-#print(modification_date("productionMessageData"));
-#print("Now's date is ",time.time());
-print("Is training file old enough to discard?",isTrainingFileOldEnough("productionMessageData"));
+
 

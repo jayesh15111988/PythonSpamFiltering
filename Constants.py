@@ -1,3 +1,5 @@
+#Collection of constants used in the program
+
 DEFAULT_PROBABILITY_VALUE_FOR_ITEMS = 1.0;
 OUTPUT_CENTROID_FILE_NAME = "../centroidHolder.txt";
 OUTPUT_VECTOR_FILE_NAME = "../categorizedPointsHolder.txt";
@@ -10,6 +12,10 @@ SMALL_TRAINING_DATA_FILE = 'sample';
 PRODUCTION_DATA_FILE = 'productionMessageData';
 DEFAULT_MESSAGE_CHARACTER = 'm';
 DEFAULT_SPAM_CHARACTER = 's';
+
+#User might need to customize this based on the label values input training file uses
+#For spam and regular messages
+
 DEFAULT_SPAM_INDICATOR_STRING = 'spam';
 DEFAULT_MESSAGE_INDICATOR_STRING = 'ham';
 OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY="../regularMessagesWordFrequency.txt"

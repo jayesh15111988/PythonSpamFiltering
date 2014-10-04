@@ -17,6 +17,8 @@ def replaceStringWithIntegerForString(inputStringValue):
         convertedIntegerValueToReturn=0;
     return convertedIntegerValueToReturn;
 
+#We will initially have 'm' for messages and 's' for spam. We will replace them by
+#integer values 1 and 0 respectively
 
 def filterPointsForPossibleStringData(messageVectorCollection):
     for individualVectorInCollection in messageVectorCollection:
@@ -31,8 +33,7 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
     #We follow convention messages followed by spam
     numberOfActualMessages=len(separatedMessageData[0]);
     numberOfSpamMessages=len(separatedMessageData[1]);
-    
-    
+
     dynamicAttributrMappingDictionary['numberOfCapitalLettersInMessage']=1;
     dynamicAttributrMappingDictionary['lengthOfLongestAllCapitalword']=2;
     dynamicAttributrMappingDictionary['messageTypeIndicator']=3;
@@ -69,9 +70,14 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
         #This will follow the pattern as (index,value)
         for index,individualAttributeTokens in enumerate(tokenizedDataIntoArray):
             lengthOfCurrentSelectedToken=len(individualAttributeTokens);
-            
+
+            #This is to avoid commonly occurring words such as to, an, a, the etc.
+            #Not using for training purpose for now. Did not find any evidence affecting actual outcome of
+            #Experiment
+
             #if(lengthOfCurrentSelectedToken<3):
             #    continue;
+
             if(individualAttributeTokens.isupper() and lengthOfCurrentSelectedToken>lengthOfLongestAllCapitalword):
                 vectorForGivenMessage[1]=len(individualAttributeTokens);
                 lengthOfLongestAllCapitalword=lengthOfCurrentSelectedToken;
@@ -84,33 +90,34 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
             if (vectorForGivenMessage[indexForGivenVector]==-1):
                 vectorForGivenMessage[indexForGivenVector]=0;
             else:
-                vectorForGivenMessage[indexForGivenVector]=vectorForGivenMessage[indexForGivenVector]+1;
+                vectorForGivenMessage[indexForGivenVector] += vectorForGivenMessage[indexForGivenVector];
 
-            #This is because we have return realMessage,spamMessage;
+            #This is because we have return realMessage,spamMessage; This is to detect boundary of real messages
+            #against spams
+
             if(externalIndex<len(separatedMessageData[0])):
 
                 #We have actual message
-
                 vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]=Constants.DEFAULT_MESSAGE_CHARACTER;
                 storeInProbabilityStoreForValue(frequencyOfWordsInRegularMessages,individualAttributeTokens)
             else:
 
                 #We have spam as we already crossed message boundary
-
                 vectorForGivenMessage[dynamicAttributrMappingDictionary['messageTypeIndicator']-1]=Constants.DEFAULT_SPAM_CHARACTER;
                 storeInProbabilityStoreForValue(frequencyOfWordsInSpamMessages,individualAttributeTokens)
+
         #Here end tokenizer loop and we go get next message - Might it be a spam or not   
         vectorForGivenMessage[dynamicAttributrMappingDictionary['numberOfCapitalLettersInMessage']-1]=getNumberOfCapitalLettersFromWord(individualPuncutationRemovedMessage);        
         vectorForGivenMessage[dynamicAttributrMappingDictionary['lengthOfLongestWordInString']-1]=len(max(tokenizedDataIntoArray, key=len));
         collectionOfVectorsOfAllStatements.append(vectorForGivenMessage);
         
-        #Commenting for time being to eliminate garbage on cosole output screen
-        
     #Last two value for 'collectionOfVectorsOfAllStatements' we append number of valid messages and spams respectively
     collectionOfVectorsOfAllStatements.append(numberOfActualMessages);
     collectionOfVectorsOfAllStatements.append(numberOfSpamMessages);
 
-    #We got out of even the most extrenal loop possible 
+    #We got out even of the most external loop above
+
+    #For testing in future application. Does not count right now though
     #topNMostOccurringWordsInMessages=dict(Counter(frequencyOfWordsInRegularMessages).most_common(5));
     #topNMostOccurringWordsInSpams=dict(Counter(frequencyOfWordsInSpamMessages).most_common(5));
 
@@ -125,43 +132,29 @@ frequencyOfWordsInSpamMessages={};
 collectionOfVectorsOfAllMessages=[];
 dynamicAttributrMappingDictionary={};
 
-
-
-
-
 def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
-
-    #Commenting for time being as Naive Bayes is on hold temporarily
 
     #Last two value of collectionOfVectorsOfAllStatements contains number of actual messages and spams respectively
     #P.S. Last value is number of spam messages out of total received message corpse
-
-    ##### Computation for classifying any future message as regular/spam using Bayes Theorm #####
-    #For each word, we set proobability of occurrence in each spam and non-spam category
     
     global frequencyOfWordsInRegularMessages;
     global frequencyOfWordsInSpamMessages;
-    
-    #print(frequencyOfWordsInRegularMessages, " Frequency in regular message ");
+
     if(isTrainingFileOldEnough(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY) or isTrainingFileOldEnough(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY)):
-        print("Storing first time");
+        print("Storing Training Model For first time run");
         setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInRegularMessages);
         setProbabilityForOccurrenceOfEachWordInStore(frequencyOfWordsInSpamMessages);
         writeDataStructureToFileWithName([frequencyOfWordsInRegularMessages],[Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY]);
         writeDataStructureToFileWithName([frequencyOfWordsInSpamMessages],[Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY]);
     else:
-        print("utilizing stored data");
+        print("Utilizing previously stored training data model");
         frequencyOfWordsInRegularMessages=getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY);
         frequencyOfWordsInSpamMessages=getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY);
-        #print("Words frequency for regular message ",frequencyOfWordsInRegularMessages);
-        #print("Words frequency for spam messages ",frequencyOfWordsInSpamMessages);
-        
-    #print("Frequency in regular Message ",frequencyOfWordsInRegularMessages,"Frequency in spam message ",frequencyOfWordsInSpamMessages);
 
-    
+    #Second last value - Total number of messages
     totalNumberRegularMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-2];
 
-    #Last value - Total number of spams
+    #Last value - Total number of spam messages
     totalNumberSpamMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-1];
 
     totalNumberOfRegularAndSpamMessages=(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering);
@@ -169,10 +162,8 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
     probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/totalNumberOfRegularAndSpamMessages);
 
     inputMessageListForNaiveBayesEvaluation=getFileData(sampleSpamFilename);
-    #print("Input messages list ",inputMessageListForNaiveBayesEvaluation);
+
     isTestFileInput=False;
-
-
     listOfSpamAndRegularMessagesTokens=[];
     listOfInputProductionMessages=[];
 
@@ -187,7 +178,7 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
 
     totalNumberOfInputMessages=len(listOfInputProductionMessages);
     totalNumberOfCorrectPredictions=0;
-    #print("List of input messages stirng is ",listOfInputProductionMessages,"And tokens are",listOfSpamAndRegularMessagesTokens);
+
     for inputMessagesIndex,individualProductionMessage in enumerate(listOfInputProductionMessages):
         outputResultOfProductionMessage=isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage);
 
@@ -223,33 +214,20 @@ def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVec
     GenerateKMeansClusters(collectionOfVectorsOfAllMessages,2,collectionOfVectorsOfProductionMessages,sampleSpamFilename);
     print("Collection of messages is ",len(max(collectionOfVectorsOfAllMessages, key=len)));
     print("length of collection vector after filtering string characters is ",len(collectionOfVectorsOfAllMessages));
-#print("collection is ",collectionOfVectorsOfAllMessages);
+
+#Keep track of time it takes to complete algorithm along with training creation and actual classification
 
 startTime = datetime.now();
 getAndFilterMessagesInDataStructureWithFileName(Constants.TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
-
-runNaiveBayesOnDataFromFileWithName(Constants.SMALL_TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+print(" Total Execution time for Vectors Preparation --> ", datetime.now()-startTime);
+startTime=datetime.now();
+runNaiveBayesOnDataFromFileWithName(Constants.TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+print(" Total Execution time for Naive Bayes Algorithm Run --> ", datetime.now()-startTime);
+startTime=datetime.now();
 
 #Following methods to write words from spam and regular messages to suitable file for graphical representation
-
 #writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"../regularMessagesFrequency.csv");
 #writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"../spamMessagesFrequency.csv");
 
-#print("Message freq",(getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY)),"\n\n");
-#print("Spams Freq",(getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY)),"\n\n");
-runKMeansClusteringOnDataFromFileWithName(Constants.SMALL_TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
-print(" Total Execution time for Algorithm --> ", datetime.now()-startTime);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+runKMeansClusteringOnDataFromFileWithName(Constants.TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+print(" Total Execution time for K-Means Algorithm Run --> ", datetime.now()-startTime);

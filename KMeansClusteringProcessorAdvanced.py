@@ -1,6 +1,7 @@
 import random;
 import math;
 from FileReader import *;
+import Constants;
 from Constants import *;
 import os.path;
 from dateTimeUtility import isTrainingFileOldEnough;
@@ -9,7 +10,7 @@ from AlgorithmVerificationRoutine import getMessagesAndClassLablesWithInputFile;
 def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutputClusters,collectionOfVectorsOfProductionMessages,inputProductionMessagesFileName):
 
     #Beginning of computation for K-means clustering for given set of message - Gotta be challenging
-    numberOfClusters=2 #Since there are only two classes for us
+    numberOfClusters=2 #Since there are only two classes for use viz. Spam and Regular Messages
     
     centroidHolderForInputMessages=[];
     numberOfClustersGeneratedSoFar=0;
@@ -17,19 +18,25 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
     messageCategorizationData=[];
     maximumVectorSequenceValue=len(collectionOfVectorsOfAllMessages)-1
         
-    
+    #If we already populated centroid holder data, use it instead of generating all over again
+    #Check if file with pre calculated data exists. We are checking for only one file as both files get generated altogether
+
     if(os.path.isfile(Constants.OUTPUT_CENTROID_FILE_NAME)):
         centroidHolderForInputMessages=getDataStructureFromFileWithName(Constants.OUTPUT_CENTROID_FILE_NAME);
         messageCategorizationData=getDataStructureFromFileWithName(Constants.OUTPUT_MESSAGE_CATEGORIZATION_FILE_NAME); 
     
-    #Check if file with precalculated data exists. We are checking for only one file as both files get generated altogether
-        
+
+
     if(len(centroidHolderForInputMessages)==0 or isTrainingFileOldEnough(Constants.OUTPUT_CENTROID_FILE_NAME)):
         while(numberOfClustersGeneratedSoFar<numberOfDesiredOutputClusters):
+
             #generate random point first range is
-        
+            #We will take any random point from collection of points as a centroid
+
             randomVectorSequence=random.randint(0, maximumVectorSequenceValue);
         
+            #Err, we regenerated same data point. Try again with another random function run
+
             if(randomVectorSequence in duplicateChecker):
                 continue;
             else:
@@ -39,11 +46,8 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         #Both centroids thus generated, append -1 to them until for both of them length is equal to
         #maximum length of vector in given collection
         lengthOfMaximumLengthVectorInCollection=len(max(collectionOfVectorsOfAllMessages, key=len));  #len(collectionOfVectorsOfAllMessages[maximumVectorSequenceValue]);
-        ###print("max length is ",lengthOfMaximumLengthVectorInCollection);
+
         newCentroidHolderForInputMessages=[];
-
-
-        #print("max length is  ",lengthOfMaximumLengthVectorInCollection);
         for individualCentroids in centroidHolderForInputMessages:
             while(len(individualCentroids)<lengthOfMaximumLengthVectorInCollection):
                 individualCentroids.append(Constants.DEFAULT_CENTROID_TO_ASSIGN_TO_DATA_POINT);
@@ -51,16 +55,13 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         #We made sure, it won't cause index out of bound for an incomplete centroid vectors
         #In case of Other vectors, we will simple check against index and their length.
         # If desired index >(=)len(vector)-1(len(vector)) then don't access elemnt simply return -1 as default value
-        #print("updated max length is",len(centroidHolderForInputMessages[0]),len(centroidHolderForInputMessages[1]));
-        #print("Generated Centroid Sequence is ",centroidHolderForInputMessages," and record sequence number is ",duplicateChecker);
-        #print("Original centroid is ",centroidHolderForInputMessages);
         #Make sure we run this loop until entire sum of difference between previous and current centroid is less
         #than some predefined threshold  - In other words, all of them have been stabilized for sure to specific set of centroid
 
-        predefinedThreshold=2.0;
-        differenceBetweenCentroids=1000;
+        predefinedThreshold=0.5;
 
-        #TODO - Use NumPy which uses low level C API for Mathematical computations
+        #Initializing distance between centroids
+        differenceBetweenCentroids=1000;
 
         index=2;    
     
@@ -91,6 +92,7 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
             index=index-1;
     
         #Previous centroid that we had - Now calculate new centroid from the array we have and compare new centroid with older ones
+
             lengthOfVector=0;
             newCentroidHolderForPoints=[];
             lengthOfVector=lengthOfMaximumLengthVectorInCollection;
@@ -106,8 +108,7 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
                     vectorWithAverageValueInit.append(totalValue/lengthOfVectorInVector);
                 newCentroidHolderForPoints.append(vectorWithAverageValueInit);
                 
-            #print("old centroid holder with points is ",centroidHolderForInputMessages,len(centroidHolderForInputMessages),len(centroidHolderForInputMessages[0]),len(centroidHolderForInputMessages[1]));
-            #print("New centroid holder with points is ",newCentroidHolderForPoints,len(newCentroidHolderForPoints),len(newCentroidHolderForPoints[0]),len(newCentroidHolderForPoints[1]));
+
 
             #Now calculate difference between old and new centroids
             #Now Append -1 to empty centroid value
@@ -120,12 +121,14 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
                     sumOfDifferencesForCentroids=sumOfDifferencesForCentroids+math.fabs(oldIndividualCentroid[indexInIndividualVector]-newIndividualCentroid[indexInIndividualVector]);        
     
             differenceBetweenCentroids=sumOfDifferencesForCentroids;
-            print("Difference at the bottom is ",differenceBetweenCentroids);
+            print("Difference between set of points for current and previous values of"
+                  "Centroids is  ",differenceBetweenCentroids);
             centroidHolderForInputMessages=newCentroidHolderForPoints;
 
         #Filter all generated points to determine which section correspond to what
         numberOfSpamsInCluster=0;
         numberOfActualMessagesInCluster=0;
+
         for individualMessageVectorFromCluster in allMessagesContainer:
             for individualVectorInVectorsCollection in individualMessageVectorFromCluster:
                 if(individualVectorInVectorsCollection[2]==0):
@@ -144,23 +147,21 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
 
         writeDataStructureToFileWithName([allMessagesContainer,centroidHolderForInputMessages],[Constants.OUTPUT_VECTOR_FILE_NAME,Constants.OUTPUT_CENTROID_FILE_NAME]);
 
-
     #In the previous step, we generated centroid based off of a training data and
     #Now it's time to classify messages from our production data
 
+    #This is array of array to hold Spam and Regular messages
     finalClassificationHolder=[[],[]];
-
-
-
 
     inputMessageListForKMeansEvaluation=getFileData(inputProductionMessagesFileName);
 
+    #This will come into picture when we will verify model on training data itself
     isTestFileInput=False;
-
 
     listOfSpamAndRegularMessagesTokens=[];
     listOfIndividualMessages=[];
 
+    #To verify if this is a testing or production data file
     tokenizedLine=inputMessageListForKMeansEvaluation[0].split('\t');
 
     if(len(tokenizedLine)>1):
@@ -168,11 +169,12 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         getMessagesAndClassLablesWithInputFile(inputMessageListForKMeansEvaluation,listOfSpamAndRegularMessagesTokens,
                                                listOfIndividualMessages);
 
-    #print("Individual message ",listOfSpamAndRegularMessagesTokens," And list of indivdual messages is ",listOfIndividualMessages);
+
     numberOfCorrectClassifications=0;
     totalNumberOfInputMessages=len(collectionOfVectorsOfProductionMessages);
+
     for vectorCollectionIndex,individualTestVector in enumerate(collectionOfVectorsOfProductionMessages):
-        minDistanceFromCentroids=DEFAULT_MINIMUM_DISTANCE_FROM_CENTROID;
+        minDistanceFromCentroids= DEFAULT_MINIMUM_DISTANCE_FROM_CENTROID;
         centroidToAssign=DEFAULT_CENTROID_TO_ASSIGN_TO_DATA_POINT;
         for centroidHolderIndex,individualFinalCentroidValues in enumerate(centroidHolderForInputMessages):
             maxVectorLength=len(individualFinalCentroidValues);
@@ -185,14 +187,16 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
                 minDistanceFromCentroids=tempminDistanceFromCentroids;
                 centroidToAssign=centroidHolderIndex;
         finalClassificationHolder[centroidToAssign].append(individualTestVector);
-        print("Spam indicator --> ",isMessageSpam(messageCategorizationData[centroidToAssign]));
+        isCurrentInputMessageSpam=isMessageSpam(messageCategorizationData[centroidToAssign]);
+
+        print(" Spam indicator -->  ",isCurrentInputMessageSpam);
+
         if(isTestFileInput):
-            if(isMessageSpam(messageCategorizationData[centroidToAssign])==listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
+            if(isCurrentInputMessageSpam==listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
                 numberOfCorrectClassifications=numberOfCorrectClassifications+1;
-            #else:
-                #print("Wrong Classification ",listOfIndividualMessages[vectorCollectionIndex]);
+
     if(isTestFileInput):
-        print("Total messages parsed ",totalNumberOfInputMessages,"Number of correct classifications",numberOfCorrectClassifications,
+        print("Total Messages Parsed ",totalNumberOfInputMessages,"Number of Correct Classifications",numberOfCorrectClassifications,
           " Accuracy of K Means classification ",numberOfCorrectClassifications/totalNumberOfInputMessages);
 
 
@@ -201,19 +205,10 @@ def isMessageSpam(messageLabelName):
     if(messageLabelName==Constants.DEFAULT_SPAM_INDICATOR_STRING):
         messageSpamIndictor=True;
     return messageSpamIndictor;
-    #print(finalClassificationHolder);
-    #print(getDataStructureFromFileWithName("categorizedPointsHolder.txt"));
-    #print(getDataStructureFromFileWithName("centroidHolder.txt"));
 
-    #Now, seggregate centroid and all points thud generated
-    #Latest Centroid Values - centroidHolderForInputMessages
-    #All points seggregated into their respective categories - allMessagesContainer - There are two groups enumerate over each of them
-    #And seggregate them as spam and non-spam messages
-    #When we are given new statement, convert it into vector and calculate euclidean distance between two centroids and 
-
-    
 #Sample small size data to verify correctness of an implementation
-#GenerateKMeansClusters([[1,2,0,3,4,3,6,8,9,0],[6,5,0,4,3,2,1],[4,5,0,6,3,2,1],[6,5,0,4,1,2,3],[100,200,1,300,456,432,291],[300,400,1,200,100,500,300]],2,[[1,3,4,5,6,7,5]]);
+#GenerateKMeansClusters([[1,2,0,3,4,3,6,8,9,0],[6,5,0,4,3,2,1],[4,5,0,6,3,2,1],[6,5,0,4,1,2,3],
+# [100,200,1,300,456,432,291],[300,400,1,200,100,500,300]],2,[[1,3,4,5,6,7,5]]);
 
 
 

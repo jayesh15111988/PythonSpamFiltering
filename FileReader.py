@@ -1,6 +1,6 @@
 import random;
 import pickle;
-import Constants;
+from Constants import DEFAULT_SPAM_INDICATOR_STRING,DEFAULT_MESSAGE_INDICATOR_STRING;
 import csv;
 
 def getFileData(fileName):
@@ -19,9 +19,9 @@ def convertAndGetFilesDataInListFromFileWithName(fileName):
     for individualLine in data:
         tokenizedLine=individualLine.split('\t');
         if(len(tokenizedLine)>1):
-            if(tokenizedLine[0] == Constants.DEFAULT_SPAM_INDICATOR_STRING):
+            if(tokenizedLine[0] == DEFAULT_SPAM_INDICATOR_STRING):
                 spamMessage.append(tokenizedLine[1]);
-            elif (tokenizedLine[0] == Constants.DEFAULT_MESSAGE_INDICATOR_STRING):
+            elif (tokenizedLine[0] == DEFAULT_MESSAGE_INDICATOR_STRING):
                 realMessage.append(tokenizedLine[1]);
             else:
                 assert True,"Value of classification label other than spam or ham"
