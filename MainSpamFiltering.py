@@ -221,7 +221,7 @@ startTime = datetime.now();
 getAndFilterMessagesInDataStructureWithFileName(Constants.TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 print(" Total Execution time for Vectors Preparation --> ", datetime.now()-startTime);
 startTime=datetime.now();
-runNaiveBayesOnDataFromFileWithName(Constants.TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+runNaiveBayesOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
 print(" Total Execution time for Naive Bayes Algorithm Run --> ", datetime.now()-startTime);
 startTime=datetime.now();
 
@@ -229,5 +229,5 @@ startTime=datetime.now();
 #writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"../regularMessagesFrequency.csv");
 #writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"../spamMessagesFrequency.csv");
 
-runKMeansClusteringOnDataFromFileWithName(Constants.TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
+runKMeansClusteringOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
 print(" Total Execution time for K-Means Algorithm Run --> ", datetime.now()-startTime);

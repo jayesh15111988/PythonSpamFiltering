@@ -189,10 +189,11 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         finalClassificationHolder[centroidToAssign].append(individualTestVector);
         isCurrentInputMessageSpam=isMessageSpam(messageCategorizationData[centroidToAssign]);
 
-        print(" Spam indicator -->  ",isCurrentInputMessageSpam);
+
 
         if(isTestFileInput):
-            if(isCurrentInputMessageSpam==listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
+            print("Input Message is ",listOfIndividualMessages[vectorCollectionIndex] ," And Spam indicator is -->  ",isCurrentInputMessageSpam);
+            if(isCurrentInputMessageSpam == listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
                 numberOfCorrectClassifications=numberOfCorrectClassifications+1;
 
     if(isTestFileInput):
