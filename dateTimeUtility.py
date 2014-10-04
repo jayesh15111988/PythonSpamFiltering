@@ -1,8 +1,10 @@
 import os;
 import datetime;
 import time;
+from Constants import DEFAULT_MAXIMUM_DAYS_BEFORE_FILE_DISCARD;
+
 def getMaximumDaysDifferenceBeforeFileGetsOld():
-    return 60;
+    return DEFAULT_MAXIMUM_DAYS_BEFORE_FILE_DISCARD;
 
 def isTrainingFileOldEnough(filename):
     if(not(os.path.isfile(filename))):

@@ -27,9 +27,10 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
 
     separatedMessageData= convertAndGetFilesDataInListFromFileWithName(inputFileName);
 
+    #We follow convention messages followed by spam
     numberOfActualMessages=len(separatedMessageData[0]);
     numberOfSpamMessages=len(separatedMessageData[1]);
-    #print(numberOfActualMessages," Initial ",numberOfSpamMessages);
+    
     
     dynamicAttributrMappingDictionary['numberOfCapitalLettersInMessage']=1;
     dynamicAttributrMappingDictionary['lengthOfLongestAllCapitalword']=2;
@@ -46,7 +47,9 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
         filteredMessagesWithPunctuationElimination.append(getStringWithPunctuationsRemoved(individualMessage));
 
     for externalIndex,individualPuncutationRemovedMessage in enumerate(filteredMessagesWithPunctuationElimination):
+        #Using this, we will get list of individual words in message - This is  basically strtok equivalent of C
         tokenizedDataIntoArray=list(filter(None, re.split('\W+',individualPuncutationRemovedMessage)));
+
         #when message is full of punctuations like e.g. :-) we get None after removing them which makes resulting string totally unusable
 
         if not tokenizedDataIntoArray:
@@ -62,6 +65,7 @@ def getAndFilterMessagesInDataStructureWithFileName(inputFileName,frequencyOfWor
         
         lengthOfLongestAllCapitalword=-1;
 
+        #This will follow the pattern as (index,value)
         for index,individualAttributeTokens in enumerate(tokenizedDataIntoArray):
             lengthOfCurrentSelectedToken=len(individualAttributeTokens);
             
@@ -121,7 +125,7 @@ collectionOfVectorsOfAllMessages=[];
 dynamicAttributrMappingDictionary={};
 
 
-getAndFilterMessagesInDataStructureWithFileName(Constants.TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
+
 
 
 def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
@@ -133,6 +137,7 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
 
     ##### Computation for classifying any future message as regular/spam using Bayes Theorm #####
     #For each word, we set proobability of occurrence in each spam and non-spam category
+    
     global frequencyOfWordsInRegularMessages;
     global frequencyOfWordsInSpamMessages;
     
@@ -147,15 +152,10 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
         print("utilizing stored data");
         frequencyOfWordsInRegularMessages=getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY);
         frequencyOfWordsInSpamMessages=getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY);
-    #Second last value - Total number of regular messages in given corpse
+        #print("Words frequency for regular message ",frequencyOfWordsInRegularMessages);
+        #print("Words frequency for spam messages ",frequencyOfWordsInSpamMessages);
+        
     #print("Frequency in regular Message ",frequencyOfWordsInRegularMessages,"Frequency in spam message ",frequencyOfWordsInSpamMessages);
-
-    
-        
-    
-        
-
-
 
     
     totalNumberRegularMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-2];
@@ -163,15 +163,24 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
     #Last value - Total number of spams
     totalNumberSpamMessagesAfterFiltering=collectionOfVectorsOfAllMessages[-1];
 
-    probabilityOfRegularMessage=(totalNumberRegularMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
-    probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering));
+    totalNumberOfRegularAndSpamMessages=(totalNumberRegularMessagesAfterFiltering+totalNumberSpamMessagesAfterFiltering);
+    probabilityOfRegularMessage=(totalNumberRegularMessagesAfterFiltering/totalNumberOfRegularAndSpamMessages);
+    probabilityOfSpamMessage=(totalNumberSpamMessagesAfterFiltering/totalNumberOfRegularAndSpamMessages);
 
     inputMessageListForNaiveBayesEvaluation=getFileData(sampleSpamFilename);
-    for individualProductionMessage in inputMessageListForNaiveBayesEvaluation:
+    print("Input messages list ",inputMessageListForNaiveBayesEvaluation);
+    tokenizedLine=inputMessageListForNaiveBayesEvaluation[0].split('\t');
+    if(len(tokenizedLine)>1):
+        print("Test file");
+    else:
+        print("not a test file");
+
+    for inputMessagesIndex,individualProductionMessage in enumerate(inputMessageListForNaiveBayesEvaluation):
         print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator -->> ",isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage));
 
 def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOfAllMessages):
-    
+
+    #We are deleting number of regular and spam messages from the end of an input list
     del collectionOfVectorsOfAllMessages[-2:];
     filterPointsForPossibleStringData(collectionOfVectorsOfAllMessages);
     collectionOfVectorsOfProductionMessages=[];
@@ -191,6 +200,7 @@ def runKMeansClusteringOnDataFromFileWithName(sampleSpamFilename,collectionOfVec
 #print("collection is ",collectionOfVectorsOfAllMessages);
 
 startTime = datetime.now();
+getAndFilterMessagesInDataStructureWithFileName(Constants.TRAINING_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 runNaiveBayesOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
 #print("Message freq",getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"\n\n");
 #print("Spams Freq",getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"\n\n");

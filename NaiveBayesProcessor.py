@@ -22,6 +22,8 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
     #Now using Actual Bayes Theorm;
 
     #This is shady - They say use zero or any marginal value using minimum value among them all and suppress it by 1/10th of its original value
+	#This is used i we encounter new word which was not set in the training data itself
+	
     lowestProbabilityValue=(min(min(frequencyOfWordsInRegularMessages.values()),min(frequencyOfWordsInSpamMessages.values())))/10;
         
     for individualTokenInInputMessage in tokenizedInputString:

@@ -23,7 +23,7 @@ def convertAndGetFilesDataInListFromFileWithName(fileName):
             elif (tokenizedLine[0] == Constants.DEFAULT_MESSAGE_INDICATOR_STRING):
                 realMessage.append(tokenizedLine[1]);
             else:
-                assert (true),"Value of classification label other than spam or ham"
+                assert True,"Value of classification label other than spam or ham"
         else:
             #Randomize append mechanism for given message we still don't know which category it belongs to
             if(random.randint(0,1)==0):

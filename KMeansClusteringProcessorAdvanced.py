@@ -21,7 +21,8 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         centroidHolderForInputMessages=getDataStructureFromFileWithName(Constants.OUTPUT_CENTROID_FILE_NAME);
         messageCategorizationData=getDataStructureFromFileWithName(Constants.OUTPUT_MESSAGE_CATEGORIZATION_FILE_NAME); 
     
-    #Check if file with precalculated data exists
+    #Check if file with precalculated data exists. We are checking for only one file as both files get generated altogether
+        
     if(len(centroidHolderForInputMessages)==0 or isTrainingFileOldEnough(Constants.OUTPUT_CENTROID_FILE_NAME)):
         while(numberOfClustersGeneratedSoFar<numberOfDesiredOutputClusters):
             #generate random point first range is
@@ -39,11 +40,13 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         lengthOfMaximumLengthVectorInCollection=len(max(collectionOfVectorsOfAllMessages, key=len));  #len(collectionOfVectorsOfAllMessages[maximumVectorSequenceValue]);
         ###print("max length is ",lengthOfMaximumLengthVectorInCollection);
         newCentroidHolderForInputMessages=[];
-    
+
+
         #print("max length is  ",lengthOfMaximumLengthVectorInCollection);
         for individualCentroids in centroidHolderForInputMessages:
             while(len(individualCentroids)<lengthOfMaximumLengthVectorInCollection):
                 individualCentroids.append(Constants.DEFAULT_CENTROID_TO_ASSIGN_TO_DATA_POINT);
+
         #We made sure, it won't cause index out of bound for an incomplete centroid vectors
         #In case of Other vectors, we will simple check against index and their length.
         # If desired index >(=)len(vector)-1(len(vector)) then don't access elemnt simply return -1 as default value
@@ -52,22 +55,16 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         #print("Original centroid is ",centroidHolderForInputMessages);
         #Make sure we run this loop until entire sum of difference between previous and current centroid is less
         #than some predefined threshold  - In other words, all of them have been stabilized for sure to specific set of centroid
-        predefinedThreshold=5.0;
+
+        predefinedThreshold=2.0;
         differenceBetweenCentroids=1000;
-
-    
-
-    
-    
 
         #TODO - Use NumPy which uses low level C API for Mathematical computations
 
+        index=2;    
     
-        index=2;
-    
-    
-    
-        while(differenceBetweenCentroids>1.0):
+        while(differenceBetweenCentroids>predefinedThreshold):
+            
             regularMessagesVectorContainer=[];
             spamMessagesVectorContainer=[];
             allMessagesContainer=[regularMessagesVectorContainer,spamMessagesVectorContainer];    
