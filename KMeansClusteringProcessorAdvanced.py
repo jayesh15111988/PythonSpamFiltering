@@ -26,7 +26,7 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
         messageCategorizationData=getDataStructureFromFileWithName(Constants.OUTPUT_MESSAGE_CATEGORIZATION_FILE_NAME); 
     
 
-
+    #print("Message categorization is ",messageCategorizationData);
     if(len(centroidHolderForInputMessages)==0 or isTrainingFileOldEnough(Constants.OUTPUT_CENTROID_FILE_NAME)):
         while(numberOfClustersGeneratedSoFar<numberOfDesiredOutputClusters):
 
@@ -173,7 +173,9 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
     numberOfCorrectClassifications=0;
     totalNumberOfInputMessages=len(collectionOfVectorsOfProductionMessages);
 
+    centroidDistanceHolder={};
     for vectorCollectionIndex,individualTestVector in enumerate(collectionOfVectorsOfProductionMessages):
+        holderForCurrentMessage=[];
         minDistanceFromCentroids= DEFAULT_MINIMUM_DISTANCE_FROM_CENTROID;
         centroidToAssign=DEFAULT_CENTROID_TO_ASSIGN_TO_DATA_POINT;
         for centroidHolderIndex,individualFinalCentroidValues in enumerate(centroidHolderForInputMessages):
@@ -186,16 +188,18 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
             if(tempminDistanceFromCentroids<minDistanceFromCentroids):
                 minDistanceFromCentroids=tempminDistanceFromCentroids;
                 centroidToAssign=centroidHolderIndex;
+            holderForCurrentMessage.append(tempminDistanceFromCentroids);
         finalClassificationHolder[centroidToAssign].append(individualTestVector);
         isCurrentInputMessageSpam=isMessageSpam(messageCategorizationData[centroidToAssign]);
-
-
+        holderForCurrentMessage.append(isCurrentInputMessageSpam);
+        centroidDistanceHolder[listOfIndividualMessages[vectorCollectionIndex]]=holderForCurrentMessage;
 
         if(isTestFileInput):
-            print("Input Message is ",listOfIndividualMessages[vectorCollectionIndex] ," And Spam indicator is -->  ",isCurrentInputMessageSpam);
+            #print("Input Message is ",listOfIndividualMessages[vectorCollectionIndex] ," And Spam indicator is -->  ",isCurrentInputMessageSpam);
             if(isCurrentInputMessageSpam == listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
                 numberOfCorrectClassifications=numberOfCorrectClassifications+1;
 
+    writeDictionaryInCSVFile(centroidDistanceHolder,"../VisualizationData.csv");
     if(isTestFileInput):
         print("Total Messages Parsed ",totalNumberOfInputMessages,"Number of Correct Classifications",numberOfCorrectClassifications,
           " Accuracy of K Means classification ",numberOfCorrectClassifications/totalNumberOfInputMessages);
