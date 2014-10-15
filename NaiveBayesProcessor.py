@@ -1,6 +1,7 @@
 import Constants;
 from StringUtilities import *;
 import re;
+import math;
 
 def setProbabilityForOccurrenceOfEachWordInStore(inputStoreWithCountOfEachWord):
     totalFrequencyOfAllWordsInStore=0;
@@ -41,4 +42,8 @@ def isMessageSpam(receivedMessage,frequencyOfWordsInRegularMessages,frequencyOfW
     finalProbabilityThatMessageIsNotSpam=temporaryProbabilityThatMessageIsNotSpam*probabilityOfRegularMessage;
     finalProbabilityThatMessageIsSpam=temporaryProbabilityThatMessageIsSpam*probabilityOfSpamMessage;
     print("P(Message)--> ",finalProbabilityThatMessageIsNotSpam," And P(spam) --> ",finalProbabilityThatMessageIsSpam);
-    return finalProbabilityThatMessageIsSpam > finalProbabilityThatMessageIsNotSpam;
+
+    normalizedIsMessageSpamProbability = math.log(finalProbabilityThatMessageIsSpam,2) if finalProbabilityThatMessageIsSpam > 0 else 0;
+    normalizedIsMessageNotSpamProbability = math.log(finalProbabilityThatMessageIsNotSpam,2) if finalProbabilityThatMessageIsNotSpam > 0 else 0;
+
+    return [normalizedIsMessageSpamProbability,normalizedIsMessageNotSpamProbability,finalProbabilityThatMessageIsSpam > finalProbabilityThatMessageIsNotSpam];

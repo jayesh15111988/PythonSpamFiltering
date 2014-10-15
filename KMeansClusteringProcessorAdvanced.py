@@ -199,7 +199,7 @@ def GenerateKMeansClusters(collectionOfVectorsOfAllMessages,numberOfDesiredOutpu
             if(isCurrentInputMessageSpam == listOfSpamAndRegularMessagesTokens[vectorCollectionIndex]):
                 numberOfCorrectClassifications=numberOfCorrectClassifications+1;
 
-    writeDictionaryInCSVFile(centroidDistanceHolder,"../VisualizationData.csv");
+    writeDictionaryInCSVFile(centroidDistanceHolder,Constants.OUTPUT_VISUALIZATION_FILE_FOR_K_MEANS);
     if(isTestFileInput):
         print("Total Messages Parsed ",totalNumberOfInputMessages,"Number of Correct Classifications",numberOfCorrectClassifications,
           " Accuracy of K Means classification ",numberOfCorrectClassifications/totalNumberOfInputMessages);

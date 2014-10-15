@@ -179,11 +179,20 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
     totalNumberOfInputMessages=len(listOfInputProductionMessages);
     totalNumberOfCorrectPredictions=0;
 
+    dictionaryForSMSMessagesStatisticsCollection = {};
+
     for inputMessagesIndex,individualProductionMessage in enumerate(listOfInputProductionMessages):
+        #Format of outputResultOfProductionMessage is in the form of typle with three values
+        #p(message is spam), p(message is not spam) and verification if message is spam or not as a boolean value
+
+
         outputResultOfProductionMessage=isMessageSpam(individualProductionMessage,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,probabilityOfRegularMessage,probabilityOfSpamMessage);
 
-        print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator for Naive Bayes classification -->> ",
-                  outputResultOfProductionMessage,"\n\n");
+
+        dictionaryForSMSMessagesStatisticsCollection[individualProductionMessage] = outputResultOfProductionMessage;
+
+        #print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator for Naive Bayes classification -->> ",
+        #         outputResultOfProductionMessage[2],"\n\n");
         if(isTestFileInput):
               if(outputResultOfProductionMessage==listOfSpamAndRegularMessagesTokens[inputMessagesIndex]):
                   totalNumberOfCorrectPredictions=totalNumberOfCorrectPredictions+1;
@@ -191,7 +200,7 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
                   print("Failed Messages are ",individualProductionMessage);
 
 
-
+    writeDictionaryInCSVFile(dictionaryForSMSMessagesStatisticsCollection,Constants.OUTPUT_VISUALIZATION_FILE_FOR_NAIVE_BAYES);
     print("Total number of input messages",totalNumberOfInputMessages,"Number of correct prediction",totalNumberOfCorrectPredictions,
           "Accuracy of Naive Bayes algorithm --> ",totalNumberOfCorrectPredictions/totalNumberOfInputMessages);
 
@@ -221,7 +230,7 @@ startTime = datetime.now();
 getAndFilterMessagesInDataStructureWithFileName(Constants.PRODUCTION_DATA_FILE,frequencyOfWordsInRegularMessages,frequencyOfWordsInSpamMessages,collectionOfVectorsOfAllMessages,dynamicAttributrMappingDictionary);
 print(" Total Execution time for Vectors Preparation --> ", datetime.now()-startTime);
 startTime=datetime.now();
-#runNaiveBayesOnDataFromFileWithName(Constants.PRODUCTION_DATA_FILE,collectionOfVectorsOfAllMessages);
+runNaiveBayesOnDataFromFileWithName(Constants.TRAINING_DATA_FILE,collectionOfVectorsOfAllMessages);
 print(" Total Execution time for Naive Bayes Algorithm Run --> ", datetime.now()-startTime);
 startTime=datetime.now();
 
@@ -229,5 +238,5 @@ startTime=datetime.now();
 #writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_REGULAR_MESSAGES_WORD_FREQUENCY),"../regularMessagesFrequency.csv");
 #writeDictionaryInCSVFile(getDataStructureFromFileWithName(Constants.OUTPUT_SPAM_MESSAGES_WORD_FREQUENCY),"../spamMessagesFrequency.csv");
 
-runKMeansClusteringOnDataFromFileWithName(Constants.TRAINING_DATA_FILE ,collectionOfVectorsOfAllMessages);
-print(" Total Execution time for K-Means Algorithm Run --> ", datetime.now()-startTime);
+#runKMeansClusteringOnDataFromFileWithName(Constants.TRAINING_DATA_FILE ,collectionOfVectorsOfAllMessages);
+#print(" Total Execution time for K-Means Algorithm Run --> ", datetime.now()-startTime);
