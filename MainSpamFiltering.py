@@ -194,7 +194,7 @@ def runNaiveBayesOnDataFromFileWithName(sampleSpamFilename,collectionOfVectorsOf
         #print("Message ->>  ",individualProductionMessage," Is Message Spam or not indicator for Naive Bayes classification -->> ",
         #         outputResultOfProductionMessage[2],"\n\n");
         if(isTestFileInput):
-              if(outputResultOfProductionMessage==listOfSpamAndRegularMessagesTokens[inputMessagesIndex]):
+              if(outputResultOfProductionMessage[2]==listOfSpamAndRegularMessagesTokens[inputMessagesIndex]):
                   totalNumberOfCorrectPredictions=totalNumberOfCorrectPredictions+1;
               else:
                   print("Failed Messages are ",individualProductionMessage);
